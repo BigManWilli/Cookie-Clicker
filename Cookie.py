@@ -2,7 +2,7 @@ import pygame
 import sys
 import json
 
-# Initialize Pygame
+# Initialize modulet Pygame
 pygame.init()
 
 # Constants
@@ -21,7 +21,7 @@ UPGRADE_FLASH_DURATION = 0.5
 cookie_count = 0
 click_value = 1
 auto_click_value = 0
-upgrade_multiplier = 1.2  # Multiplier for increasing upgrade costs
+upgrade_multiplier = 1.2  # Prisændring på power-ups
 upgrades = {
     "Grandma's Recipe": {"quantity": 0, "base_cost": 10, "click_value": 2, "auto_click_value": 0},
     "Cookie Factory": {"quantity": 0, "base_cost": 50, "click_value": 5, "auto_click_value": 0},
@@ -38,7 +38,7 @@ upgrades = {
     "Rainbow Sprinkles": {"quantity": 0, "base_cost": 200000, "click_value": 0, "auto_click_value": 5000},
 }
 
-# Load save data
+# Loader gemt data
 try:
     with open(SAVE_FILE, "r") as file:
         save_data = json.load(file)
@@ -50,12 +50,12 @@ try:
 except FileNotFoundError:
     pass
 
-# Set up the window
+# Fremstiller canvaset/vinduet
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Cookie Clicker")
 clock = pygame.time.Clock()
 
-# Load images
+# Loader billede
 cookie_img = pygame.image.load("cookie.jpg")
 cookie_img = pygame.transform.scale(cookie_img, (150, 150))  # Make the cookie smaller
 cookie_rect = cookie_img.get_rect(center=(WIDTH // 4, HEIGHT // 2))  # Move the cookie to the left
@@ -69,6 +69,7 @@ def draw_text(text, font, color, x, y):
     text_rect.topleft = (x, y)
     screen.blit(text_surface, text_rect)
 
+# Funktion for opbevaring af sin progress
 def save_progress():
     data_to_save = {
         "cookie_count": cookie_count,
@@ -80,20 +81,21 @@ def save_progress():
     with open(SAVE_FILE, "w") as file:
         json.dump(data_to_save, file)
 
+# Funktion som tegner click-effekten, som bruger konstanten fra før "CLICK_COLOR"
 def draw_click_effect():
     pygame.draw.circle(screen, CLICK_COLOR, (cookie_rect.centerx, cookie_rect.centery), 60, width=10)
 
-def draw_upgrade_effect():
+def draw_upgrade_effect(): #Gør det samme som som click-effekt, men for power-up-effekt
     pygame.draw.rect(screen, UPGRADE_COLOR, cookie_rect)
 
-# Main game loop
+# Sort baggrund
 running = True
 click_flash_timer = 0
 upgrade_flash_timer = 0
 while running:
     screen.fill(BLACK)
 
-    # Handle events
+    # Handlinger i spillet
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             save_progress()
@@ -115,40 +117,40 @@ while running:
                             auto_click_value += upgrade_data["auto_click_value"]
                             upgrade_flash_timer = UPGRADE_FLASH_DURATION
 
-    # Update auto-clicker
+    # Opdaterer auto-clicker
     cookie_count += auto_click_value / FPS
 
-    # Draw cookie
+    # Tegner cookie
     screen.blit(cookie_img, cookie_rect)
 
-    # Draw cookie count
+    # Skriver cookie-count
     draw_text(f"Cookies: {int(cookie_count)}", font, WHITE, 10, 10)
 
-    # Draw upgrades
+    # Skriver power-ups
     for i, upgrade in enumerate(upgrades):
         upgrade_data = upgrades[upgrade]
         cost = upgrade_data["base_cost"] * (upgrade_multiplier ** upgrade_data["quantity"])
         draw_text(f"{upgrade} ({upgrade_data['quantity']}): {int(cost)} cookies", font, WHITE, WIDTH // 2, 10 + i * 50)
 
-    # Draw passive income
+    # Skriver passive income
     draw_text(f"Passive income: {auto_click_value} cookies per second", font, WHITE, 10, HEIGHT - 50)
 
-    # Draw click effect
+    # Kalder på funktionen som tegner click-effekten
     if click_flash_timer > 0:
         draw_click_effect()
         click_flash_timer -= 1 / FPS
 
-    # Draw upgrade effect
+    # Kalder på funktionen som tegner power-up-effekten
     if upgrade_flash_timer > 0:
         draw_upgrade_effect()
         upgrade_flash_timer -= 1 / FPS
 
-    # Update the display
+    # Opdaterer displayet
     pygame.display.flip()
 
-    # Cap the frame rate
+    # 60 FPS
     clock.tick(FPS)
 
-# Quit Pygame
+# Slutter Pygame
 pygame.quit()
 sys.exit()
